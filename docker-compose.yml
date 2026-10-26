@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: asset_tracker_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: asset_tracker
+      POSTGRES_USER: asset_tracker_user
+      POSTGRES_PASSWORD: asset_tracker_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U asset_tracker_user -d asset_tracker"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: asset_tracker_app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/asset_tracker
+      SPRING_DATASOURCE_USERNAME: asset_tracker_user
+      SPRING_DATASOURCE_PASSWORD: asset_tracker_password
+      APP_JWT_SECRET: asset_tracker_secret_key_change_me
+      APP_JWT_EXPIRATION: 86400000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
