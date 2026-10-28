@@ -47,7 +47,7 @@ public class AssetController {
         return ResponseEntity.status(HttpStatus.CREATED).body(assetService.create(request));
     }
 
-    @PatchMapping("/{id}/assign/{userId}")
+    @PostMapping("/{id}/assign/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AssetResponse> assign(@PathVariable Long id, @PathVariable UUID userId) {
         return ResponseEntity.ok(assetService.assign(id, userId));
